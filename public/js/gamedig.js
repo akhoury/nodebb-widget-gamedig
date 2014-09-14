@@ -1,5 +1,4 @@
 $(function() {
-    var serversContainer = $('#gamedig-servers-container');
     var apiHost = '/api/admin/widgets/gamedig';
     
     var addserver = function(e) {
@@ -48,10 +47,19 @@ $(function() {
     };
     
     var fetchserver = function(e) {
-        e.preventDefault();
+        if (e && e.preventDefault)
+            e.preventDefault();
+
+        var key;
+        if (e.target) {
+            key = $(e.target).parents('.gamedig-server').attr('data-key');
+        } else {
+            key = e;
+        }
+
         $.ajax({
             type: 'get',
-            url: apiHost + '/fetchserver?key=' + $(e.target).parents('.gamedig-server').attr('data-key'),
+            url: apiHost + '/fetchserver?key=' + key,
             cache: false
         });
         return false;
@@ -79,7 +87,7 @@ $(function() {
             return;
         }
 
-        serversContainer.removeClass('hidden').show();
+        $('.gamedig-servers-container').removeClass('hidden').show();
 
         $('.gamedig-servers').append(
             $('<tr />')
@@ -94,7 +102,7 @@ $(function() {
                 .append('<td class="gamedig-server-actions"><i class="fa fa-times gamedig-refresh-btn"></i></td>')
         );
 
-        socket.emit('gamedig.serverfetch', {key: data.key});
+        fetchserver(data.key);
     };
 
     var onserverrmed = function(data) {
@@ -104,7 +112,7 @@ $(function() {
             $('.gamedig-server[data-key="' + data.key+ '"]').remove();
 
             if (! $('.gamedig-server').length) {
-                serversContainer.hide().addClass('hidden');
+                $('.gamedig-servers-container').hide().addClass('hidden');
             }
         }
     };

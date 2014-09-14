@@ -5,10 +5,10 @@
         <thead>
             <tr>
                 <th>Type</th>
-                <th>HostName</th>
+                <th>Host:Port</th>
                 <th>Map</th>
                 <th>Players</th>
-                <th>Actions <i class="fa fa-times gamedig-refresh-all-btn"></i></th>
+                <th>Actions <i class="fa fa-refresh gamedig-refresh-all-btn"></i></th>
             </tr>
         </thead>
         <tbody class="gamedig-servers">

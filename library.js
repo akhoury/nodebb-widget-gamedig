@@ -94,7 +94,7 @@
         return data.host + ':' + data.port + '/' + data.type;
     };
 
-    var addserver = addserver = function(data, callback) {
+    var addserver = function(data, callback) {
         callback = typeof callback === 'function' ? callback : noop;
         
         if (!data.host || !data.port || !data.type) {
@@ -105,7 +105,7 @@
             host: data.host,
             port: data.port,
             type: data.type,
-            key: serverKey(data.host, data.port, data.type)
+            key: serverKey(data)
         };
 
         Widget._settings.servers[server.key] = server;
@@ -146,14 +146,16 @@
     var fetchserver = function(key, callback) {
         callback = typeof callback === 'function' ? callback : noop;
 
-        if (!data.key || (data.host && data.port && data.type)) {
+        if (!key) {
             return callback('can\'t fetch, mising data');
         }
-        if (!data.key) {
-            data.key = serverKey(data);
+
+        if (key.host) {
+            key = serverKey(key);
         }
 
-        var server = Widget._settings.servers[data.key];
+        var server = Widget._settings.servers[key];
+
         if (server) {
             gamedig.query({
                 type: server.type,
@@ -163,12 +165,13 @@
                 if (state.error) {
                     return callback(state.error);
                 }
-                state.key = data.key;
+                state.key = key;
                 Widget.emit('gamedig.serverfetched', state);
                 callback(null, state);
             });
         } else {
-            callback('couldn\'t find server:' + data.key + ', is it added?');
+            console.log(Widget._settings.servers);
+            callback('couldn\'t find server:' + key + ', is it added?');
         }
     };
     
@@ -199,7 +202,7 @@
         });
     };
 
-    Widget.init = function(express, middleware, controllers, callback) {
+    Widget.init = function(app, middleware, controllers, callback) {
         var templatesToLoad = ['gamedig.tpl', 'admin/gamedig.tpl'];
 
         function loadTemplate(template, next) {
@@ -215,7 +218,7 @@
 
         Widget.settings(function() {
             async.each(templatesToLoad, loadTemplate);
-            var prefix = '/admin/widgets/gamedig';
+            var prefix = '/api/admin/widgets/gamedig';
             
             app.get(prefix + '/fetchserver', Widget.fetchserver);
             app.get(prefix + '/fetchallservers', Widget.fetchallservers);
