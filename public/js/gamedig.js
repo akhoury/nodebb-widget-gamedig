@@ -1,6 +1,7 @@
 $(function() {
     var serversContainer = $('#gamedig-servers-container');
-
+    var apiHost = '/api/admin/widgets/gamedig';
+    
     var addserver = function(e) {
         e.preventDefault();
         var server = {
@@ -8,15 +9,54 @@ $(function() {
             port: $('#gamedig-server-port').val(),
             type: $('#gamedig-server-type').val()
         };
-        socket.emit('gamedig.addserver', server, function(){});
+        $.ajax({
+            type: 'post',
+            data: {
+                _csrf: $('#csrf_token').val(),
+                server: server
+            },
+            url: apiHost + '/addserver',
+            cache: false
+        });
         return false;
     };
 
     var rmserver = function(e) {
         e.preventDefault();
-        socket.emit('gamedig.rmserver', {key: $(e.target).parents('.gamedig-server').attr('data-key')}, function(){});
+        $.ajax({
+            type: 'post',
+            data: {
+                _csrf: $('#csrf_token').val(),
+                server: {
+                    key: $(e.target).parents('.gamedig-server').attr('data-key')
+                }
+            },
+            url: apiHost + '/rmserver',
+            cache: false
+        });
         return false;
     };
+    
+    var fetchallservers = function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'get',
+            url: apiHost + '/fetchallservers',
+            cache: false
+        });
+        return false;
+    };
+    
+    var fetchserver = function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'get',
+            url: apiHost + '/fetchserver?key=' + $(e.target).parents('.gamedig-server').attr('data-key'),
+            cache: false
+        });
+        return false;
+    };
+
 
     var onserverfetched = function(data) {
         console.log('onserverfetched', data);
@@ -31,7 +71,7 @@ $(function() {
         serverEl.find('gamedig-server-players_maxplayers').text( data.players.length + '/' + data.maxplayers);
     };
 
-    var onserveradd = function(data) {
+    var onserveradded = function(data) {
         console.log('onserveradd', data);
 
         if (!data || data.error) {
@@ -51,12 +91,13 @@ $(function() {
                 .append('<td class="gamedig-server-host_port">' + data.host + ':' + data.port + '</td>')
                 .append('<td class="gamedig-server-map">' + (data.map || 'loading...') + '</td>')
                 .append('<td class="gamedig-server-players_maxplayers">' + (data.maxplayers && Array.isArray(data.players) ? data.players.length + '/' + data.maxplayers : 'loading ...')+ '</td>')
+                .append('<td class="gamedig-server-actions"><i class="fa fa-times gamedig-refresh-btn"></i></td>')
         );
 
         socket.emit('gamedig.serverfetch', {key: data.key});
     };
 
-    var onserverrm = function(data) {
+    var onserverrmed = function(data) {
         console.log('onserverrm', data);
 
         if (data) {
@@ -81,10 +122,12 @@ $(function() {
     var $body = $('body');
     $body.on('click', '.gamedig-add-btn', addserver);
     $body.on('click', '.gamedig-rm-btn', rmserver);
+    $body.on('click', '.gamedig-refresh-btn', fetchserver);
+    $body.on('click', '.gamedig-refresh-all-btn', fetchallservers);
 
     socket.on('gamedig.serversfetchedall', onserversfetchedall);
     socket.on('gamedig.serverfetched', onserverfetched);
-    socket.on('gamedig.serveradd', onserveradd);
-    socket.on('gamedig.serverrm', onserverrm);
+    socket.on('gamedig.serveradded', onserveradded);
+    socket.on('gamedig.serverrmed', onserverrmed);
 
 }());
