@@ -1,0 +1,18 @@
+{
+	"id": "nodebb-widget-gamedig",
+	"name": "NodeBB Gamedig Widget",
+	"description": "Gamedig widget",
+	"url": "https://github.com/akhoury/nodebb-widget-gamedig",
+	"library": "./library.js",
+	"hooks": [
+        {"hook": "static:app.load", "method": "init"},
+		{"hook": "filter:widgets.getWidgets", "method": "defineWidget"},
+		{"hook": "filter:widget.render:gamedig", "method": "renderWidget"}
+	],
+	"templates": "./public/templates",
+	"staticDirs": {
+        "js": "public/js",
+        "css": "public/css"
+    },
+    "compatibility": "~0.5.0"
+}
