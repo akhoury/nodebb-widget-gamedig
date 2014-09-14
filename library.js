@@ -118,7 +118,7 @@
     Widget.addserver = function(req, res, next) {
         addserver(req.body.server, function(err, server) {
             res.json(server);
-            Widget.emit('gamedig.serveradd', server);
+            Widget.emit('gamedig.serveradded', server);
         });    
     };
 
@@ -132,7 +132,7 @@
         delete Widget._settings.servers[data.key];
 
         Widget.settings(Widget._settings, function() {
-            Widget.emit('gamedig.serverrm', data);
+            Widget.emit('gamedig.serverrmed', data);
             callback(null, data);
         });
     };
@@ -194,12 +194,13 @@
 
     Widget.fetchallservers = function(req, res, next) {
         fetchallservers(function(err, servers) {
+            Widget.emit('gamedig.serverfetchedall', state);
             res.json(servers);
         });
     };
 
     Widget.init = function(express, middleware, controllers, callback) {
-        var templatesToLoad = ["gamedig.tpl","admin/gamedig.tpl"];
+        var templatesToLoad = ['gamedig.tpl', 'admin/gamedig.tpl'];
 
         function loadTemplate(template, next) {
             fs.readFile(path.resolve(__dirname, './public/templates/' + template), function (err, data) {
