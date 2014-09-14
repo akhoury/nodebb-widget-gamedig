@@ -111,6 +111,7 @@
         Widget._settings.servers[server.key] = server;
 
         Widget.settings(Widget._settings, function() {
+            Widget.emit('gamedig.serveradded', server);
             callback(null, server)
         });
     };
@@ -118,7 +119,6 @@
     Widget.addserver = function(req, res, next) {
         addserver(req.body.server, function(err, server) {
             res.json(server);
-            Widget.emit('gamedig.serveradded', server);
         });    
     };
 
@@ -164,6 +164,7 @@
                     return callback(state.error);
                 }
                 state.key = data.key;
+                Widget.emit('gamedig.serverfetched', state);
                 callback(null, state);
             });
         } else {
@@ -173,7 +174,6 @@
     
     Widget.fetchserver = function(req, res, next) {
         fetchserver(req.query.key, function(err, state) {
-            Widget.emit('gamedig.serverfetched', state);
             res.json(state);
         });
 
@@ -188,13 +188,13 @@
                 servers[key] = server;
             });
         }, function(err) {
+            Widget.emit('gamedig.serverfetchedall', state);
             callback(err, servers);
         });   
     };
 
     Widget.fetchallservers = function(req, res, next) {
         fetchallservers(function(err, servers) {
-            Widget.emit('gamedig.serverfetchedall', state);
             res.json(servers);
         });
     };
