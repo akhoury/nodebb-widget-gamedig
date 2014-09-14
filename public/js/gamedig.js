@@ -21,6 +21,8 @@ $(function() {
     };
 
     var rmserver = function(e) {
+        debugger;
+        
         e.preventDefault();
         $.ajax({
             type: 'post',
@@ -99,7 +101,7 @@ $(function() {
                 .append('<td class="gamedig-server-host_port">' + data.host + ':' + data.port + '</td>')
                 .append('<td class="gamedig-server-map">' + (data.map || 'loading...') + '</td>')
                 .append('<td class="gamedig-server-players_maxplayers">' + (data.maxplayers && Array.isArray(data.players) ? data.players.length + '/' + data.maxplayers : 'loading ...')+ '</td>')
-                .append('<td class="gamedig-server-actions"><i class="fa fa-times gamedig-refresh-btn"></i></td>')
+                .append('<td class="gamedig-server-actions"><i class="fa fa-refresh gamedig-refresh-btn"></i></td>')
         );
 
         fetchserver(data.key);
