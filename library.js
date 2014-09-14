@@ -25,7 +25,7 @@
     Widget.settings = function(settings, callback) {
         callback = typeof callback === 'function' ? callback : noop;
 
-        var defaults = {"servers": '{}'};
+        var defaults = {servers: {}};
 
         if (typeof settings === 'function') {
             callback = settings;
@@ -34,13 +34,10 @@
         if (typeof callback !== 'function') {
             callback = function(){};
         }
-        if (settings) {
-            try {
-                settings.servers = JSON.stringify(settings.servers);
-            } catch (e) {
-                settings.servers = defaults.servers;
-            }
-            meta.settings.set('gamedig', settings, callback);
+        if (settings != null) {
+            meta.settings.set('gamedig', settings, function() {
+                Widget.settings(callback);
+            });
         } else {
             meta.settings.get('gamedig', function(err, settings) {
                 if (err) {
@@ -53,12 +50,6 @@
 
                 if (!settings.servers) {
                     settings.servers =  defaults.servers;
-                }
-
-                try {
-                    settings.servers = JSON.parse(settings.servers);
-                } catch (e) {
-                    settings = {servers: {}};
                 }
 
                 Widget._settings = settings;
@@ -86,7 +77,6 @@
     };
 
     Widget.on = function() {
-        console.log(arguments);
         return sockets.server.sockets.on.apply(sockets.server.sockets, arguments);
     };
 
@@ -170,7 +160,6 @@
                 callback(null, state);
             });
         } else {
-            console.log(Widget._settings.servers);
             callback('couldn\'t find server:' + key + ', is it added?');
         }
     };
@@ -208,7 +197,6 @@
         function loadTemplate(template, next) {
             fs.readFile(path.resolve(__dirname, './public/templates/' + template), function (err, data) {
                 if (err) {
-                    console.log(err.message);
                     return next(err);
                 }
                 Widget.templates[template] = data.toString();
