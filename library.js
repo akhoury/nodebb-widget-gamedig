@@ -94,10 +94,9 @@
         return data.host + ':' + data.port + '/' + data.type;
     };
 
-    Widget.addserver = function(data, callback) {
-        console.log('addserver', data);
-
+    var addserver = addserver = function(data, callback) {
         callback = typeof callback === 'function' ? callback : noop;
+        
         if (!data.host || !data.port || !data.type) {
             return callback('can\'t add, missing data');
         }
@@ -112,14 +111,18 @@
         Widget._settings.servers[server.key] = server;
 
         Widget.settings(Widget._settings, function() {
-            Widget.emit('gamedig.serveradd', server);
             callback(null, server)
         });
     };
 
-    Widget.rmserver = function(data, callback) {
-        console.log('rmserver', data);
+    Widget.addserver = function(req, res, next) {
+        addserver(req.body.server, function(err, server) {
+            res.json(server);
+            Widget.emit('gamedig.serveradd', server);
+        });    
+    };
 
+    var rmserver = function(data, callback) {
         callback = typeof callback === 'function' ? callback : noop;
 
         if (!data.key) {
@@ -134,9 +137,13 @@
         });
     };
 
-    Widget.fetch = function(data, callback) {
-        console.log('fetch', data);
+    Widget.rmserver = function(req, res, next) {
+        rmserver(req.body.server, function(err, server) {
+            res.json(server);
+        });
+    };
 
+    var fetchserver = function(key, callback) {
         callback = typeof callback === 'function' ? callback : noop;
 
         if (!data.key || (data.host && data.port && data.type)) {
@@ -158,21 +165,36 @@
                 }
                 state.key = data.key;
                 callback(null, state);
-                Widget.emit('gamedig.serverfetched', state);
             });
         } else {
             callback('couldn\'t find server:' + data.key + ', is it added?');
         }
     };
+    
+    Widget.fetchserver = function(req, res, next) {
+        fetchserver(req.query.key, function(err, state) {
+            Widget.emit('gamedig.serverfetched', state);
+            res.json(state);
+        });
 
-    Widget.fetchall = function(callback) {
-        console.log('fetchall');
+    };
 
+    var fetchallservers = function(callback) {
         callback = typeof callback === 'function' ? callback : noop;
+        
+        var servers = {};
         async.eachLimit(Object.keys(Widget._settings.servers), 3, function(key, next) {
-            Widget.fetch(Widget._settings.servers[key], next);
+            fetchserver(Widget._settings.servers[key], function(err, server) {
+                servers[key] = server;
+            });
         }, function(err) {
-            callback(err);
+            callback(err, servers);
+        });   
+    };
+
+    Widget.fetchallservers = function(req, res, next) {
+        fetchallservers(function(err, servers) {
+            res.json(servers);
         });
     };
 
@@ -192,11 +214,12 @@
 
         Widget.settings(function() {
             async.each(templatesToLoad, loadTemplate);
-
-            Widget.on('gamedig.serverfetch', Widget.fetch);
-            Widget.on('gamedig.serversfetchall', Widget.fetchall);
-            Widget.on('gamedig.rmserver', Widget.rmserver);
-            Widget.on('gamedig.addserver', Widget.addserver);
+            var prefix = '/admin/widgets/gamedig';
+            
+            app.get(prefix + '/fetchserver', Widget.fetchserver);
+            app.get(prefix + '/fetchallservers', Widget.fetchallservers);
+            app.post(prefix + '/addserver', middleware.admin.isAdmin, Widget.addserver);
+            app.post(prefix + '/rmserver', middleware.admin.isAdmin, Widget.addserver);
 
             callback();
         });
