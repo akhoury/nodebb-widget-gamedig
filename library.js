@@ -14,10 +14,26 @@
         templates: {}
     };
 
-    Widget.renderHTMLWidget = function(widget, callback) {
+    var toArray = function(obj) {
+        if (Array.isArray(obj)) {
+            return obj;
+        }
+        if (!obj) {
+            return [];
+        }
+        var arr =[];
+        for(var k in obj ) {
+            if (obj.hasOwnProperty(k)){
+                arr.push(obj[k]);
+            }
+        }
+        return arr;
+    };
+
+    Widget.renderWidget = function(widget, callback) {
         Widget.settings(function(err, settings) {
             var html = Widget.templates['gamedig.tpl'];
-            html = templates.parse(html, settings);
+            html = templates.parse(html, {servers: toArray(settings.servers)});
             callback(null, html);
         });
     };
@@ -25,7 +41,7 @@
     Widget.settings = function(settings, callback) {
         callback = typeof callback === 'function' ? callback : noop;
 
-        var defaults = {servers: {}};
+        var defaults = {servers: '{}'};
 
         if (typeof settings === 'function') {
             callback = settings;
@@ -35,11 +51,19 @@
             callback = function(){};
         }
         if (settings != null) {
+
+            try {
+                settings.servers = JSON.stringify(settings.servers);
+            } catch (e) {
+                settings = defaults.servers;
+            }
+
             meta.settings.set('gamedig', settings, function() {
                 Widget.settings(callback);
             });
         } else {
             meta.settings.get('gamedig', function(err, settings) {
+
                 if (err) {
                     return callback(err);
                 }
@@ -49,11 +73,15 @@
                 }
 
                 if (!settings.servers) {
-                    settings.servers =  defaults.servers;
+                    settings.servers = defaults.servers;
+                }
+                try {
+                    settings.servers = JSON.parse(settings.servers);
+                } catch (e) {
+                    settings.servers = {};
                 }
 
                 Widget._settings = settings;
-
                 callback(null, settings);
             });
         }
@@ -62,11 +90,14 @@
     Widget.defineWidget = function(widgets, callback) {
         callback = typeof callback === 'function' ? callback : noop;
 
+        var data = {servers: toArray(Widget._settings.servers)};
+        var html = templates.parse(Widget.templates['admin/gamedig.tpl'], data);
+
         widgets.push({
             widget: "gamedig",
             name: "Gamedig",
             description: "NodeBB Gamedig widget",
-            content: Widget.templates['admin/gamedig.tpl']
+            content: html
         });
 
         callback(null, widgets);
@@ -150,7 +181,7 @@
             gamedig.query({
                 type: server.type,
                 host: server.host,
-                port: server.port
+                port: parseInt(server.port, 10)
             }, function(state) {
                 if (state.error) {
                     return callback(state.error);
@@ -178,9 +209,10 @@
         async.eachLimit(Object.keys(Widget._settings.servers), 3, function(key, next) {
             fetchserver(Widget._settings.servers[key], function(err, server) {
                 servers[key] = server;
+                next();
             });
         }, function(err) {
-            Widget.emit('gamedig.serverfetchedall', state);
+            Widget.emit('gamedig.serversfetchedall', servers);
             callback(err, servers);
         });   
     };

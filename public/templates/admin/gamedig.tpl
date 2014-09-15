@@ -2,7 +2,11 @@
 
 <h4>Servers</h4>
 
+<!-- IF servers.length -->
+<div class="table-responsive gamedig-servers-container">
+<!-- ELSE -->
 <div class="table-responsive gamedig-servers-container hidden">
+<!-- ENDIF servers.length -->
     <table class="table">
         <thead>
             <tr>
@@ -18,9 +22,20 @@
             <tr class="gamedig-server" data-key="{servers.key}">
                 <td class="gamedig-server-type">{servers.type}</td>
                 <td class="gamedig-server-host_port">{servers.host}:{servers.port}</td>
+
+                <!-- IF servers.map -->
                 <td class="gamedig-server-map">{servers.map}</td>
+                <!-- ELSE -->
+                <td class="gamedig-server-map">loading...</td>
+                <!-- ENDIF servers.map -->
+
+                <!-- IF servers.maxplayers -->
                 <td class="gamedig-server-players_maxplayers">{servers.players}/{servers.maxplayers}</td>
-                <td class="gamedig-server-actions"><i class="fa fa-refresh gamedig-refresh-btn"></i><i class="fa fa-times gamedig-rm-btn"></i></td>
+                <!-- ELSE -->
+                <td class="gamedig-server-players_maxplayers">loading...</td>
+                <!-- ENDIF servers.maxplayers -->
+
+                <td class="gamedig-server-actions"><i class="fa fa-refresh gamedig-refresh-btn"></i>&nbsp;<i class="fa fa-times gamedig-rm-btn"></i></td>
             </tr>
         <!-- END servers -->
         </tbody>
@@ -42,9 +57,10 @@
     <label class="sr-only" for="gamedig-server-type">type</label>
     <input type="text" class="form-control" name="gamedig-server-type" id="gamedig-server-type"  placeholder="type i.e codmw2" />
   </div>
-
-  <button class="gamedig-add-btn btn btn-default">Add Server</button>
 </div>
+
+<button class="gamedig-add-btn btn btn-default">Add Server</button>
+
 
 <script src="/plugins/nodebb-widget-gamedig/js/gamedig.js"></script>
 
