@@ -212,7 +212,7 @@
                 next();
             });
         }, function(err) {
-            Widget.emit('gamedig.serversfetchedall', servers);
+			Widget.emit('gamedig.serversfetchedall', servers);
             callback(err, servers);
         });   
     };
@@ -243,7 +243,7 @@
             app.get(prefix + '/fetchserver', Widget.fetchserver);
             app.get(prefix + '/fetchallservers', Widget.fetchallservers);
             app.post(prefix + '/addserver', middleware.admin.isAdmin, Widget.addserver);
-            app.post(prefix + '/rmserver', middleware.admin.isAdmin, Widget.addserver);
+            app.post(prefix + '/rmserver', middleware.admin.isAdmin, Widget.rmserver);
 
             callback();
         });

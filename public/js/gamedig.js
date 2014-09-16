@@ -2,7 +2,7 @@ $(function() {
     var apiHost = '/api/admin/widgets/gamedig';
     
     var addserver = function(e) {
-        e.preventDefault();
+		e.preventDefault();
         var $host = $('#gamedig-server-host');
         var $port = $('#gamedig-server-port');
         var $type = $('#gamedig-server-type');
@@ -36,7 +36,7 @@ $(function() {
     };
 
     var rmserver = function(e) {
-        e.preventDefault();
+		e.preventDefault();
         $.ajax({
             type: 'post',
             data: {
@@ -52,7 +52,7 @@ $(function() {
     };
     
     var fetchallservers = function(e) {
-        if (e && e.preventDefault)
+		if (e && e.preventDefault)
             e.preventDefault();
 
         var dfd = $.ajax({
@@ -120,8 +120,6 @@ $(function() {
                 .append('<td class="gamedig-server-players_maxplayers">' + (data.maxplayers && Array.isArray(data.players) ? data.players.length + '/' + data.maxplayers : 'loading ...')+ '</td>')
                 .append('<td class="gamedig-server-actions"><i class="fa fa-refresh gamedig-refresh-btn"></i>' + (app.isAdmin ? '&nbsp;<i class="fa fa-times gamedig-rm-btn"></i>' : '' ) + '</td>')
         );
-
-        bind();
         fetchserver(data.key);
     };
 
@@ -136,12 +134,11 @@ $(function() {
     };
 
     var onserversfetchedall = function(servers) {
-        if (servers) {
+		if (servers) {
             $.each(servers, function(key, server) {
                 onserverfetched(server);
             });
         }
-        bind();
     };
 
     var $body = $('body');
@@ -153,12 +150,15 @@ $(function() {
     socket.on('gamedig.serverrmed', onserverrmed);
 
     var bind = function() {
-        var serversContainer = $('.gamedig-servers-container');
-        serversContainer.on('click', '.gamedig-rm-btn', rmserver);
-        serversContainer.on('click', '.gamedig-refresh-btn', fetchserver);
-        serversContainer.on('click', '.gamedig-refresh-all-btn', fetchallservers);
+        $('.gamedig-servers-container').each(function(i, el) {
+			el = $(el);
+
+			el.on('click', '.gamedig-rm-btn', rmserver);
+			el.on('click', '.gamedig-refresh-btn', fetchserver);
+			el.on('click', '.gamedig-refresh-all-btn', fetchallservers);
+		});
     };
 
     bind();
-    fetchallservers();
+    fetchallservers().done(onserversfetchedall);
 }());

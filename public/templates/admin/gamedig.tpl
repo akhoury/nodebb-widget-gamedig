@@ -11,7 +11,7 @@
         <thead>
             <tr>
                 <th>Type</th>
-                <th>HostName</th>
+                <th>Host:Port</th>
                 <th>Map</th>
                 <th>Players</th>
                 <th>Actions <i class="fa fa-refresh gamedig-refresh-all-btn"></i></th>
@@ -59,7 +59,9 @@
   </div>
 </div>
 
-<button class="gamedig-add-btn btn btn-default">Add Server</button>
+<div class="gamedig-toolbar">
+	<button class="gamedig-add-btn btn btn-default">Add Server</button>
+</div>
 
 
 <script src="/plugins/nodebb-widget-gamedig/js/gamedig.js"></script>

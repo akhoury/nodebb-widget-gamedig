@@ -1,0 +1,11 @@
+.gamedig-servers-container {
+    cursor: default;
+}
+.gamedig-servers-container i.fa {
+    cursor: hand;
+    cursor: pointer;
+}
+.gamedig-toolbar {
+    overflow: hidden;
+    margin-top: 10px;
+}
